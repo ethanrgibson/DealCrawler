@@ -1,0 +1,14 @@
+{
+    "name": "amazon-deal-crawler",
+    "version": "1.0.0",
+    "description": "A scraper to find outdoor gear deals on Amazon",
+    "main": "crawler.js",
+    "scripts": {
+        "start": "node crawler.js"
+    },
+    "dependencies": {
+        "puppeteer": "^23.0.0",
+        "puppeteer-extra": "^3.3.6",
+        "puppeteer-extra-plugin-stealth": "^2.11.2"
+    }
+}
