@@ -61,9 +61,17 @@ async function run() {
                 searchUrl = DEFAULT_TARGET_URL;
             } else {
                 // Construct brand-specific search URL
-                const query = `Outdoor Gear ${brand}`;
+                let queryBrand = brand;
+                let usePrefix = true;
+
+                if (brand.startsWith('^')) {
+                    queryBrand = brand.substring(1);
+                    usePrefix = false;
+                }
+
+                const query = usePrefix ? `Outdoor Gear ${queryBrand}` : queryBrand;
                 searchUrl = `https://www.amazon.com/s?k=${encodeURIComponent(query)}`;
-                console.log(`Searching for brand: ${brand}`);
+                console.log(`Searching for brand: ${queryBrand} (Query: "${query}")`);
             }
 
             let deals = [];

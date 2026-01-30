@@ -14,10 +14,17 @@ A scraper to find outdoor gear deals on Amazon.
    *Scrapes general "Outdoor Gear" top brands.*
 
 2. **Specific Brands** (CLI Arguments):
+   Scrapes specific brands provided as arguments. By default, searches are prefixed with "Outdoor Gear".
    ```bash
    node crawler.js "North Face" "Patagonia"
    ```
-   *Scrapes specific brands provided as arguments.*
+   
+3. **Raw Brand Search** (No "Outdoor Gear" Prefix):
+   Prepend `^` to a brand name to search for *exactly* that term without the "Outdoor Gear" prefix.
+   ```bash
+   node crawler.js "^Stanley" "^Yeti"
+   ```
+   *Useful for brands where "Outdoor Gear" might skew results.*
 
 ## Output
 - Deals found are saved to: `Deals/deals.txt`
