@@ -158,7 +158,10 @@ async function run() {
 
                 deals = deals.concat(newUniqueDeals);
 
-                if (deals.length >= TARGET_DEAL_COUNT) break;
+                if (deals.length >= TARGET_DEAL_COUNT) {
+                    deals = deals.slice(0, TARGET_DEAL_COUNT);
+                    break;
+                }
 
                 // Pagination
                 const nextButton = await page.$('.s-pagination-next:not(.s-pagination-disabled)');
