@@ -5,11 +5,17 @@ const fs = require('fs');
 
 const DEFAULT_TARGET_URL = 'https://www.amazon.com/s?k=Outdoor+Gear&rh=n%3A3375251%2Cp_89%3ATop+Brands&dc&_encoding=UTF8&crid=369PQ7EJT8LV1&qid=1764975122&rnid=2528832011&sprefix=outdoor%2Bgear%2Caps%2C194&ref=sr_nr_p_89_1';
 const MIN_DISCOUNT = 25;
-const TARGET_DEAL_COUNT = 15;
+let TARGET_DEAL_COUNT = 15;
 const MAX_PAGES = 5; // Safety limit
 
-// Get brands from CLI args
-const brands = process.argv.slice(2);
+// Get args and parse limit if provided
+const args = process.argv.slice(2);
+const limitIndex = args.indexOf('--limit');
+if (limitIndex !== -1 && args[limitIndex + 1]) {
+    TARGET_DEAL_COUNT = parseInt(args[limitIndex + 1], 10) || 15;
+    args.splice(limitIndex, 2); // Remove --limit and its value from args
+}
+const brands = args;
 
 async function run() {
     const browser = await puppeteer.launch({
@@ -44,6 +50,7 @@ async function run() {
     await page.setViewport({ width: 1280, height: 800 });
 
     let allDeals = [];
+    let seenLinks = new Set();
 
     // Determine search list (either specific brands or one general search)
     const searchQueue = brands.length > 0 ? brands : ['__DEFAULT__'];
@@ -136,7 +143,20 @@ async function run() {
                 }, MIN_DISCOUNT);
 
                 console.log(`Found ${pageDeals.length} potential deals on this page.`);
-                deals = deals.concat(pageDeals);
+
+                let newUniqueDeals = [];
+                for (const d of pageDeals) {
+                    // Amazon links often have tracking like ?... or /ref=... which makes identical items look different.
+                    const cleanLink = d.link.split('?')[0].split('/ref=')[0];
+                    if (!seenLinks.has(cleanLink)) {
+                        seenLinks.add(cleanLink);
+                        newUniqueDeals.push({ ...d, link: cleanLink }); // Optionally substitute with clean link
+                    }
+                }
+
+                console.log(`Kept ${newUniqueDeals.length} unique deals.`);
+
+                deals = deals.concat(newUniqueDeals);
 
                 if (deals.length >= TARGET_DEAL_COUNT) break;
 

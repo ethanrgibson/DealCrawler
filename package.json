@@ -4,7 +4,8 @@
     "description": "A scraper to find outdoor gear deals on Amazon",
     "main": "crawler.js",
     "scripts": {
-        "start": "node crawler.js"
+        "start": "node crawler.js",
+        "random": "node random-search.js"
     },
     "dependencies": {
         "puppeteer": "^23.0.0",
