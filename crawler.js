@@ -189,12 +189,36 @@ async function run() {
     // Write to file
     const fileContent = allDeals.map(d => `${d.title}\nPrice: $${d.currentPrice} (Was $${d.listPrice} - ${d.discount}% off)\nLink: ${d.link}\nIs Top Brand? Yes (Filtered by Amazon/User)\n------------------------`).join('\n\n');
 
-    const outputDir = 'Deals';
-    if (!fs.existsSync(outputDir)) {
-        fs.mkdirSync(outputDir);
+    const baseOutputDir = 'Deals';
+    if (!fs.existsSync(baseOutputDir)) {
+        fs.mkdirSync(baseOutputDir);
     }
-    fs.writeFileSync(`${outputDir}/deals.txt`, fileContent);
-    console.log(`Done! Found ${allDeals.length} total deals. Saved to ${outputDir}/deals.txt.`);
+
+    const now = new Date();
+    const dateStr = now.toISOString().split('T')[0]; // YYYY-MM-DD
+    
+    // Calculate week of the month (1-4)
+    const day = now.getDate();
+    let weekOfMonth = Math.ceil(day / 7);
+    if (weekOfMonth > 4) weekOfMonth = 4; // Group anything from 22nd onwards into Week 4
+
+    // e.g. Deals/Week 2
+    const outputDir = `${baseOutputDir}/Week ${weekOfMonth}`;
+    if (!fs.existsSync(outputDir)) {
+        fs.mkdirSync(outputDir, { recursive: true });
+    }
+
+    let filename = `deals_${dateStr}.txt`;
+    let counter = 2;
+
+    // Check if filename exists, and if so prepend 2-, 3-, etc.
+    while (fs.existsSync(`${outputDir}/${filename}`)) {
+        filename = `${counter}-deals_${dateStr}.txt`;
+        counter++;
+    }
+    
+    fs.writeFileSync(`${outputDir}/${filename}`, fileContent);
+    console.log(`Done! Found ${allDeals.length} total deals. Saved to ${outputDir}/${filename}.`);
 }
 
 run();
