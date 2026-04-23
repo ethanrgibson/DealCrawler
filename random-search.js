@@ -32,14 +32,27 @@ if (validBrands.length === 0) {
     process.exit(1);
 }
 
-const dailyTrackingPath = path.join(__dirname, 'Brands', 'daily_searched.json');
+const now = new Date();
+const year = now.getFullYear();
+const month = now.getMonth();
+const day = now.getDate();
+let weekOfMonth = Math.ceil(day / 7);
+if (weekOfMonth > 4) weekOfMonth = 4;
+
+const weekKey = `${year}-${month + 1}-W${weekOfMonth}`;
+const weeklyDir = path.join(__dirname, 'Deals', `Week ${weekOfMonth}`);
+
+if (!fs.existsSync(weeklyDir)) {
+    fs.mkdirSync(weeklyDir, { recursive: true });
+}
+
+const weeklyTrackingPath = path.join(weeklyDir, 'weekly_searched.json');
 
 function loadTracker() {
-    if (fs.existsSync(dailyTrackingPath)) {
+    if (fs.existsSync(weeklyTrackingPath)) {
         try {
-            const data = JSON.parse(fs.readFileSync(dailyTrackingPath, 'utf8'));
-            const today = new Date().toISOString().split('T')[0];
-            if (data.date === today) {
+            const data = JSON.parse(fs.readFileSync(weeklyTrackingPath, 'utf8'));
+            if (data.weekKey === weekKey) {
                 return data.searched || [];
             }
         } catch (e) {
@@ -50,26 +63,25 @@ function loadTracker() {
 }
 
 function saveTracker(searchedBrands) {
-    const today = new Date().toISOString().split('T')[0];
     const data = {
-        date: today,
+        weekKey: weekKey,
         searched: searchedBrands
     };
-    fs.writeFileSync(dailyTrackingPath, JSON.stringify(data, null, 2), 'utf8');
+    fs.writeFileSync(weeklyTrackingPath, JSON.stringify(data, null, 2), 'utf8');
 }
 
 const alreadySearched = loadTracker();
 const remainingBrands = validBrands.filter(b => !alreadySearched.includes(b));
 
 if (remainingBrands.length === 0) {
-    console.log('All brands from the MasterList have already been searched today!');
-    console.log('If you want to search again today, you can delete Brands/daily_searched.json');
+    console.log('All brands from the MasterList have already been searched this week!');
+    console.log(`If you want to search again this week, you can delete Deals/Week ${weekOfMonth}/weekly_searched.json`);
     process.exit(0);
 }
 
 const numToSelect = Math.min(numBrands, remainingBrands.length);
 if (remainingBrands.length < numBrands) {
-    console.log(`Only ${remainingBrands.length} brand(s) left to search today!`);
+    console.log(`Only ${remainingBrands.length} brand(s) left to search this week!`);
 }
 
 // Shuffle array using Fisher-Yates
