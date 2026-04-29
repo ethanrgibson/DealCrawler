@@ -51,10 +51,10 @@ async function scrapeBrands(brands, config) {
         for (const brand of searchQueue) {
             try {
                 let searchUrl;
+                let queryBrand = brand;
                 if (brand === '__DEFAULT__') {
                     searchUrl = DEFAULT_TARGET_URL;
                 } else {
-                    let queryBrand = brand;
                     let usePrefix = true;
 
                     if (brand.startsWith('^')) {
@@ -86,13 +86,13 @@ async function scrapeBrands(brands, config) {
                         break;
                     }
 
-                    const pageDeals = await page.evaluate((minDiscount) => {
+                    const pageDeals = await page.evaluate((minDiscount, brandName) => {
                         const results = [];
                         const items = document.querySelectorAll('[data-component-type="s-search-result"]');
 
                         items.forEach((item, index) => {
-                            const titleEl = item.querySelector('h2 span');
-                            const title = titleEl ? titleEl.innerText : 'Unknown Product';
+                            const titleEl = item.querySelector('h2');
+                            const title = titleEl ? titleEl.textContent.trim() : 'Unknown Product';
 
                             if (title.match(/\d+\s*in\s*1/i)) {
                                 return;
@@ -103,6 +103,9 @@ async function scrapeBrands(brands, config) {
 
                             const priceEl = item.querySelector('.a-price .a-offscreen');
                             const listPriceEl = item.querySelector('.a-text-price .a-offscreen');
+
+                            const imgEl = item.querySelector('img.s-image, img[class*="image_"], img');
+                            const imageUrl = imgEl ? imgEl.src : '';
 
                             if (priceEl && listPriceEl && link) {
                                 const currentPriceStr = priceEl.innerText.replace(/[^0-9.]/g, '');
@@ -117,6 +120,8 @@ async function scrapeBrands(brands, config) {
                                     if (discount >= minDiscount) {
                                         results.push({
                                             title,
+                                            brand: brandName === '__DEFAULT__' ? 'Amazon Top Brand' : brandName,
+                                            imageUrl,
                                             link,
                                             currentPrice,
                                             listPrice,
@@ -127,7 +132,7 @@ async function scrapeBrands(brands, config) {
                             }
                         });
                         return results;
-                    }, minDiscount);
+                    }, minDiscount, queryBrand);
 
                     console.log(`Found ${pageDeals.length} potential deals on this page.`);
 

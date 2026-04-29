@@ -48,7 +48,7 @@ function appendDealsToFile(deals, outputDir, dateStr) {
 
     const timestamp = new Date().toLocaleTimeString();
     const header = `\n\n=== Runs at ${timestamp} ===\n\n`;
-    const fileContent = deals.map(d => `${d.title}\nPrice: $${d.currentPrice} (Was $${d.listPrice} - ${d.discount}% off)\nLink: ${d.link}\nIs Top Brand? Yes (Filtered by Amazon/User)\n------------------------`).join('\n\n');
+    const fileContent = deals.map(d => `Brand: ${d.brand}\nTitle: ${d.title}\nImage: ${d.imageUrl}\nPrice: $${d.currentPrice} (Was $${d.listPrice} - ${d.discount}% off)\nLink: ${d.link}\nIs Top Brand? Yes (Filtered by Amazon/User)\n------------------------`).join('\n\n');
 
     if (fs.existsSync(filePath)) {
         fs.appendFileSync(filePath, header + fileContent);

@@ -5,9 +5,11 @@
     "main": "crawler.js",
     "scripts": {
         "start": "node crawler.js",
-        "random": "node random-search.js"
+        "random": "node random-search.js",
+        "ui": "node server.js"
     },
     "dependencies": {
+        "express": "^5.2.1",
         "puppeteer": "^23.0.0",
         "puppeteer-extra": "^3.3.6",
         "puppeteer-extra-plugin-stealth": "^2.11.2"
